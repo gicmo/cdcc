@@ -2,6 +2,7 @@ cmake_minimum_required (VERSION 3.0)
 project (cdcc C)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(CMAKE_INSTALL_PREFIX $ENV{HOME}/.local)
 
 find_package(PkgConfig REQUIRED)
 
