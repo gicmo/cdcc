@@ -212,6 +212,19 @@ static int call_tool(gchar **args) {
   return 0;
 }
 
+static GStrv
+convert_argv(int argc, char **argv, const gchar *toolpath) {
+  int i;
+
+  GStrv args = g_new0(gchar *, argc+1);
+  args[0] = g_strdup(toolpath);
+  for (i = 1; i < argc; i++) {
+    args[i] = g_strdup(argv[i]);
+  }
+
+  return args;
+}
+
 int main(int argc, char **argv) {
 
   g_autofree gchar *toolname = extract_toolname(argv[0]);
@@ -221,18 +234,7 @@ int main(int argc, char **argv) {
   }
 
   g_autofree gchar *toolpath = g_find_program_in_path(toolname);
-
-  if (toolpath == NULL) {
-    toolpath = toolname;
-    toolname = NULL;
-  }
-
-  int i;
-  g_autofree gchar **args = g_new0(gchar *, argc+1);
-  args[0] = toolpath;
-  for (i = 1; i < argc; i++) {
-    args[i] = argv[i];
-  }
+  g_auto(GStrv) args = convert_argv(argc, argv, toolpath);
 
   int res = call_tool(args);
   return res;
