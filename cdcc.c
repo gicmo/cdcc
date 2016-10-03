@@ -119,15 +119,38 @@ static void db_insert(sqlite3 *db, GList *files, char **argv) {
 
 }
 
+static gchar *
+extract_toolname(const char *name) {
+  gchar *pos = g_strstr_len(name, -1, "-");
+
+  if (pos == NULL || *++pos == '\0') {
+    return NULL;
+  }
+
+  return g_strdup(pos);
+}
+
 
 int main(int argc, char **argv) {
 
+  g_autofree gchar *toolname = extract_toolname(argv[0]);
+
+  if (toolname == NULL) {
+    toolname = g_strdup("gcc");
+  }
+
+  g_autofree gchar *toolpath = g_find_program_in_path(toolname);
+
+  if (toolpath == NULL) {
+    toolpath = toolname;
+    toolname = NULL;
+  }
 
   int i;
-  g_auto(GStrv) args = g_new0(gchar *, argc+1);
-  args[0] = g_strdup("gcc");
+  g_autofree gchar **args = g_new0(gchar *, argc+1);
+  args[0] = toolpath;
   for (i = 1; i < argc; i++) {
-    args[i] = g_strdup(argv[i]);
+    args[i] = argv[i];
   }
 
   //
