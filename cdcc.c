@@ -119,27 +119,11 @@ static void db_insert(sqlite3 *db, GList *files, char **argv) {
 
 }
 
+
 int main(int argc, char **argv) {
-  GList* files = NULL;
+
 
   int i;
-  for (i = 1; i < argc; i++) {
-    if (!g_str_has_prefix(argv[i], "-")) {
-      if (is_known_type(argv[i])) {
-        files = g_list_append(files, argv[i]);
-      }
-
-      continue;
-    }
-
-    if (g_str_equal(argv[i], "-o")) {
-      i++;
-      continue;
-    }
-  }
-
-
-  //
   g_auto(GStrv) args = g_new0(gchar *, argc+1);
   args[0] = g_strdup("gcc");
   for (i = 1; i < argc; i++) {
@@ -187,6 +171,24 @@ int main(int argc, char **argv) {
   if (db_path == NULL) {
     return 0;
   }
+
+  GList* files = NULL;
+
+  for (i = 1; i < argc; i++) {
+    if (!g_str_has_prefix(argv[i], "-")) {
+      if (is_known_type(argv[i])) {
+        files = g_list_append(files, argv[i]);
+      }
+
+      continue;
+    }
+
+    if (g_str_equal(argv[i], "-o")) {
+      i++;
+      continue;
+    }
+  }
+
 
   //success for the tool/compiler, let's record the files in the db
   if (g_list_length(files) > 0) {
