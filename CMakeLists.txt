@@ -1,6 +1,8 @@
 cmake_minimum_required (VERSION 3.0)
 project (cdcc C)
 
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 find_package(PkgConfig REQUIRED)
 
 pkg_check_modules(GLIB2 glib-2.0)
