@@ -27,7 +27,7 @@ static gboolean is_known_type(const char *name)
       return TRUE;
     }
   }
-
+g
   return FALSE;
 }
 
@@ -118,6 +118,61 @@ static void db_insert(sqlite3 *db, GList *files, gchar **argv) {
   }
 
 }
+
+static void export_data() {
+  const gchar *db_path = g_getenv("CDCC_DB");
+
+  if (db_path == NULL) {
+    fprintf(stderr, "CDCC_DB not specified");
+    return;
+  }
+
+  sqlite3 *db;
+  db = db_open(db_path);
+
+  if (db == NULL) {
+    return;
+  }
+
+
+  const char *sql = "SELECT * from cflags";
+
+  sqlite3_stmt *stmt;
+
+  int res = sqlite3_prepare_v2(db, sql, strlen(sql), &stmt, NULL);
+  if (res != SQLITE_OK) {
+    g_warning("SQL: Could not prepare statement: %s", sqlite3_errmsg(db));
+    goto out;
+  }
+
+  for ( ; ; ) {
+    res = sqlite3_step(stmt);
+
+    if (res == SQLITE_ROW) {
+
+      const unsigned char *dir = sqlite3_column_text(stmt, 0);
+      const unsigned char *filename = sqlite3_column_text(stmt, 1);
+      const unsigned char *cflags = sqlite3_column_text(stmt, 2);
+
+      if (dir == NULL || filename == NULL || cflags == NULL) {
+        fprintf(stderr, "SQL: NULL values in row. skipping");
+        continue;
+      }
+
+      printf("path: %s, file: %s, flags: %s", dir, filename, cflags);
+    } else if (res == SQLITE_DONE) {
+      break;
+    } else {
+      fprintf(stderr, "SQL: Could not get data: %s\n", sqlite3_errmsg(db));
+      goto out;
+    }
+
+  }
+
+ out:
+  db_close(db);
+}
+
 
 static gchar *
 extract_toolname(const char *name) {
@@ -213,11 +268,24 @@ static int call_tool(gchar **args) {
 }
 
 static GStrv
-convert_argv(int argc, char **argv, const gchar *toolpath) {
+convert_argv(int argc, char **argv) {
   int i;
 
+  gchar *name = extract_toolname(argv[0]);
+
+  if (name == NULL) {
+    if (argc < 2) {
+      fprintf(stderr, "%s: invalid use of arguments\n", argv[0]);
+      return NULL;
+    }
+
+    name = g_strdup(argv[1]);
+    argc--;
+    argv++;
+  }
+
   GStrv args = g_new0(gchar *, argc+1);
-  args[0] = g_strdup(toolpath);
+  args[0] = g_strdup(name);
   for (i = 1; i < argc; i++) {
     args[i] = g_strdup(argv[i]);
   }
@@ -225,12 +293,20 @@ convert_argv(int argc, char **argv, const gchar *toolpath) {
   return args;
 }
 
+
 int main(int argc, char **argv) {
 
   g_autofree gchar *toolname = extract_toolname(argv[0]);
 
   if (toolname == NULL) {
-    toolname = g_strdup("gcc");
+    if (argc < 2) {
+      fprintf(stderr, "%s: invalid use of arguments\n", argv[0]);
+      return 1;
+    }
+
+    toolname = g_strdup(argv[1]);
+    argc--;
+    argv++;
   }
 
   g_autofree gchar *toolpath = g_find_program_in_path(toolname);
