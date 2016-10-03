@@ -16,3 +16,6 @@ link_directories(${SQLITE3_LIBRARY_DIRS})
 
 add_executable(cdcc cdcc.c)
 target_link_libraries(cdcc ${GLIB2_LIBRARIES} ${SQLITE3_LIBRARIES})
+
+install(TARGETS cdcc RUNTIME DESTINATION bin)
+
