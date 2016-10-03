@@ -72,7 +72,7 @@ static void db_close(sqlite3 *db) {
   }
 }
 
-static void db_insert(sqlite3 *db, GList *files, char **argv) {
+static void db_insert(sqlite3 *db, GList *files, gchar **argv) {
   static const char *sql =
     "INSERT INTO cflags(dir, file, flags) VALUES(?, ?, ?);";
 
@@ -130,28 +130,7 @@ extract_toolname(const char *name) {
   return g_strdup(pos);
 }
 
-
-int main(int argc, char **argv) {
-
-  g_autofree gchar *toolname = extract_toolname(argv[0]);
-
-  if (toolname == NULL) {
-    toolname = g_strdup("gcc");
-  }
-
-  g_autofree gchar *toolpath = g_find_program_in_path(toolname);
-
-  if (toolpath == NULL) {
-    toolpath = toolname;
-    toolname = NULL;
-  }
-
-  int i;
-  g_autofree gchar **args = g_new0(gchar *, argc+1);
-  args[0] = toolpath;
-  for (i = 1; i < argc; i++) {
-    args[i] = argv[i];
-  }
+static int call_tool(gchar **args) {
 
   //
   GPid pid = 0;
@@ -197,17 +176,19 @@ int main(int argc, char **argv) {
 
   GList* files = NULL;
 
-  for (i = 1; i < argc; i++) {
-    if (!g_str_has_prefix(argv[i], "-")) {
-      if (is_known_type(argv[i])) {
-        files = g_list_append(files, argv[i]);
+  gchar **iter;
+  for (iter = ++args; *iter; iter++) {
+    gchar *option = *iter;
+    if (!g_str_has_prefix(option, "-")) {
+      if (is_known_type(option)) {
+        files = g_list_append(files, (gpointer) option);
       }
 
       continue;
     }
 
-    if (g_str_equal(argv[i], "-o")) {
-      i++;
+    if (g_str_equal(option, "-o")) {
+      iter++;
       continue;
     }
   }
@@ -229,4 +210,30 @@ int main(int argc, char **argv) {
 
  compile:
   return 0;
+}
+
+int main(int argc, char **argv) {
+
+  g_autofree gchar *toolname = extract_toolname(argv[0]);
+
+  if (toolname == NULL) {
+    toolname = g_strdup("gcc");
+  }
+
+  g_autofree gchar *toolpath = g_find_program_in_path(toolname);
+
+  if (toolpath == NULL) {
+    toolpath = toolname;
+    toolname = NULL;
+  }
+
+  int i;
+  g_autofree gchar **args = g_new0(gchar *, argc+1);
+  args[0] = toolpath;
+  for (i = 1; i < argc; i++) {
+    args[i] = argv[i];
+  }
+
+  int res = call_tool(args);
+  return res;
 }
