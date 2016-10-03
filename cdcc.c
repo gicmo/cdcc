@@ -143,7 +143,7 @@ int main(int argc, char **argv) {
                                          &err);
 
   if (!ok) {
-    g_error("Could not spawn %s: %s", args[0], err->message);
+    g_warning("Could not spawn %s: %s", args[0], err->message);
     return 1;
   }
 
@@ -158,7 +158,7 @@ int main(int argc, char **argv) {
     }
     int errsave = errno;
 
-    g_error("waitpid error %s", g_strerror(errsave));
+    g_warning("waitpid error %s", g_strerror(errsave));
     return 1;
   }
 
