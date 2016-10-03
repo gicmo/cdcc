@@ -183,11 +183,16 @@ int main(int argc, char **argv) {
     return status;
   }
 
+  const gchar *db_path = g_getenv("CDCC_DB");
+  if (db_path == NULL) {
+    return 0;
+  }
+
   //success for the tool/compiler, let's record the files in the db
   if (g_list_length(files) > 0) {
     sqlite3 *db;
 
-    db = db_open("test.db");
+    db = db_open(db_path);
 
     if (db == NULL) {
       goto compile;
