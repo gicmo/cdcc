@@ -130,19 +130,6 @@ static int save_flags(const gchar * const *args) {
   return 0;
 }
 
-static GStrv
-convert_argv(int argc, char **argv, const gchar *toolpath) {
-  int i;
-
-  GStrv args = g_new0(gchar *, argc+1);
-  args[0] = g_strdup(toolpath);
-  for (i = 1; i < argc; i++) {
-    args[i] = g_strdup(argv[i]);
-  }
-
-  return args;
-}
-
 int main(int argc, char **argv) {
 
   g_autofree gchar *toolname = extract_toolname(argv[0]);
@@ -152,16 +139,16 @@ int main(int argc, char **argv) {
   }
 
   g_autofree gchar *toolpath = g_find_program_in_path(toolname);
-  g_auto(GStrv) args = convert_argv(argc, argv, toolpath);
+  argv[0] = toolpath;
 
-  int res = call_tool((const char **) args);
+  int res = call_tool((const char **) argv);
 
   if (res != 0) {
     return res;
   }
 
   //it is not a fatal error if something goes wrong saving to the db
-  save_flags((const char**) args);
+  save_flags((const char **) argv);
 
   return res;
 }
