@@ -21,12 +21,12 @@ link_directories(${GJSON_LIBRARY_DIRS})
 add_executable(cdcc-cc cc.c db.c)
 target_link_libraries(cdcc-cc ${GLIB2_LIBRARIES} ${SQLITE3_LIBRARIES})
 
-add_executable(cdcc-query query.c db.c)
-target_link_libraries(cdcc-query
+add_executable(cdcc-gen gen.c db.c)
+target_link_libraries(cdcc-gen
   ${GLIB2_LIBRARIES}
   ${SQLITE3_LIBRARIES}
   ${GJSON_LIBRARIES})
 
 install(TARGETS cdcc-cc    RUNTIME DESTINATION bin)
-install(TARGETS cdcc-query RUNTIME DESTINATION bin)
+install(TARGETS cdcc-gen   RUNTIME DESTINATION bin)
 
