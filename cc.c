@@ -72,7 +72,7 @@ static void db_close(sqlite3 *db) {
   }
 }
 
-static void db_insert(sqlite3 *db, GList *files, gchar **argv) {
+static void db_insert(sqlite3 *db, GList *files, const gchar * const *argv) {
   static const char *sql =
     "INSERT INTO cflags(dir, file, flags) VALUES(?, ?, ?);";
 
@@ -85,7 +85,7 @@ static void db_insert(sqlite3 *db, GList *files, gchar **argv) {
   }
 
   g_autofree gchar *cwd = g_get_current_dir();
-  g_autofree gchar *flags = g_strjoinv(" ", argv);
+  g_autofree gchar *flags = g_strjoinv(" ", (gchar **) argv);
 
   GList *iter;
   for (iter = files; iter; iter = iter ->next) {
@@ -168,7 +168,7 @@ static int call_tool(gchar **args) {
   return status;
 }
 
-static int save_flags(gchar **args) {
+static int save_flags(const gchar * const *args) {
 
   const gchar *db_path = g_getenv("CDCC_DB");
   if (db_path == NULL) {
@@ -177,9 +177,9 @@ static int save_flags(gchar **args) {
 
   GList* files = NULL;
 
-  gchar **iter;
+  const gchar * const *iter;
   for (iter = ++args; *iter; iter++) {
-    gchar *option = *iter;
+    const gchar *option = *iter;
     if (!g_str_has_prefix(option, "-")) {
       if (is_known_type(option)) {
         files = g_list_append(files, (gpointer) option);
@@ -244,7 +244,7 @@ int main(int argc, char **argv) {
   }
 
   //it is not a fatal error if something goes wrong saving to the db
-  save_flags(args);
+  save_flags((const char**) args);
 
   return res;
 }
