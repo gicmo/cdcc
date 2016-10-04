@@ -82,11 +82,16 @@ void db_insert(sqlite3 *db, GList *files, const gchar * const *argv) {
       continue;
     }
 
-
+    //insert data now
     res = sqlite3_step(stmt);
     if (res != SQLITE_DONE) {
       g_warning("SQL: could not insert for %s\n", fn);
+      break;
+    } else {
+      //should not fail after a successful call to _step()
+      sqlite3_reset(stmt);
     }
   }
 
 }
+
