@@ -165,9 +165,10 @@ static int call_tool(gchar **args) {
   }
 
 
-  if (status != 0) {
-    return status;
-  }
+  return status;
+}
+
+static int save_flags(gchar **args) {
 
   const gchar *db_path = g_getenv("CDCC_DB");
   if (db_path == NULL) {
@@ -237,5 +238,13 @@ int main(int argc, char **argv) {
   g_auto(GStrv) args = convert_argv(argc, argv, toolpath);
 
   int res = call_tool(args);
+
+  if (res != 0) {
+    return res;
+  }
+
+  //it is not a fatal error if something goes wrong saving to the db
+  save_flags(args);
+
   return res;
 }
