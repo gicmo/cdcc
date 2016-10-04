@@ -93,7 +93,7 @@ static int save_flags(const gchar * const *args) {
     return 0;
   }
 
-  GList* files = NULL;
+  g_autoptr(GList) files = NULL;
 
   const gchar * const *iter;
   for (iter = args + 1; *iter; iter++) {
