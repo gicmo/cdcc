@@ -27,12 +27,16 @@ target_link_libraries(cdcc-gen
   ${SQLITE3_LIBRARIES}
   ${GJSON_LIBRARIES})
 
-SET(link_name   cdcc-gcc)
-SET(link_target cdcc-cc)
-ADD_CUSTOM_COMMAND(TARGET cdcc-cc POST_BUILD
-  COMMAND ln -s ${link_target} ${link_name}
-  COMMENT "Generating legacy symbolic link")
-
 install(TARGETS cdcc-cc    RUNTIME DESTINATION bin)
 install(TARGETS cdcc-gen   RUNTIME DESTINATION bin)
-install(FILES ${CMAKE_BINARY_DIR}/cdcc-gcc  DESTINATION bin)
+
+set(TOOLS gcc g++ clang clang++)
+foreach(tool IN LISTS TOOLS)
+  SET(link_name   cdcc-${tool})
+  SET(link_target cdcc-cc)
+  ADD_CUSTOM_COMMAND(TARGET cdcc-cc POST_BUILD
+    COMMAND ln -sf ${link_target} ${link_name}
+    COMMENT "cdcc-${tool} -> cdcc-cc")
+  install(FILES ${CMAKE_BINARY_DIR}/cdcc-${tool}  DESTINATION bin)
+endforeach()
+
