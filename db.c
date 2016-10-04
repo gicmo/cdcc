@@ -116,7 +116,7 @@ void db_insert(sqlite3 *db, GList *files, const gchar * const *argv) {
 gboolean
 db_query (sqlite3 *db, const char *path, db_query_result_fn fn, gpointer user_data)
 {
-   const char *sql = "SELECT * from cflags WHERE dir GLOB ?";
+   const char *sql = "SELECT * from cflags WHERE file GLOB ?";
 
   sqlite3_stmt *stmt;
 
