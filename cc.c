@@ -130,13 +130,15 @@ extract_toolname(const char *name) {
   return g_strdup(pos);
 }
 
-static int call_tool(gchar **args) {
+static int call_tool(const gchar * const *args) {
+
+  g_auto(GStrv) argv = g_strdupv((gchar **) args);
 
   //
   GPid pid = 0;
   GError *err = NULL;
   gboolean ok = g_spawn_async_with_pipes(NULL, //wdir, i.e. inherit
-                                         args, //argv
+                                         argv, //argv
                                          NULL, //evnp, i.e. inherit
                                          G_SPAWN_SEARCH_PATH | G_SPAWN_DO_NOT_REAP_CHILD,
                                          NULL, NULL, //child setup func
@@ -237,7 +239,7 @@ int main(int argc, char **argv) {
   g_autofree gchar *toolpath = g_find_program_in_path(toolname);
   g_auto(GStrv) args = convert_argv(argc, argv, toolpath);
 
-  int res = call_tool(args);
+  int res = call_tool((const char **) args);
 
   if (res != 0) {
     return res;
