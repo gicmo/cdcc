@@ -230,7 +230,7 @@ int main(int argc, char **argv) {
   g_autofree gchar *toolname = extract_toolname(argv[0]);
 
   if (toolname == NULL) {
-    toolname = g_strdup("gcc");
+    toolname = g_strdup("cc");
   }
 
   g_autofree gchar *toolpath = g_find_program_in_path(toolname);
