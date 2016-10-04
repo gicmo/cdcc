@@ -10,7 +10,13 @@ static gboolean export_single(const Record *data, gpointer user_data)
   return TRUE;
 }
 
-static int export_data(const char *path) {
+int main(int argc, char **argv)
+{
+  const char *path = "*";
+  if (argc > 1) {
+    path = argv[1];
+  }
+
   const gchar *db_path = g_getenv("CDCC_DB");
 
   if (db_path == NULL) {
@@ -27,18 +33,6 @@ static int export_data(const char *path) {
 
   db_query(db, path, export_single, NULL);
 
- out:
   db_close(db);
   return 0;
-}
-
-int main(int argc, char **argv)
-{
-  const char *path = "*";
-  if (argc > 1) {
-    path = argv[1];
-  }
-
-  int res = export_data(path);
-  return res;
 }
