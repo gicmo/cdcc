@@ -75,7 +75,6 @@ void db_insert(sqlite3 *db, GList *files, const gchar * const *argv) {
     }
 
     char *abspath = g_file_get_path(f);
-    fprintf(stderr, "file: %s [%s] -> %s\n", fn, abspath, flags);
 
     res = sqlite3_bind_text(stmt, 1, cwd, strlen(cwd), 0);
     if (res != SQLITE_OK) {
