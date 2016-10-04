@@ -178,7 +178,7 @@ static int save_flags(const gchar * const *args) {
   GList* files = NULL;
 
   const gchar * const *iter;
-  for (iter = ++args; *iter; iter++) {
+  for (iter = args + 1; *iter; iter++) {
     const gchar *option = *iter;
     if (!g_str_has_prefix(option, "-")) {
       if (is_known_type(option)) {
