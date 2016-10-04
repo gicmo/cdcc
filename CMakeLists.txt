@@ -6,7 +6,7 @@ set(CMAKE_INSTALL_PREFIX $ENV{HOME}/.local)
 
 find_package(PkgConfig REQUIRED)
 
-pkg_check_modules(GLIB2 glib-2.0)
+pkg_check_modules(GLIB2 glib-2.0 gio-2.0)
 include_directories(${GLIB2_INCLUDE_DIRS})
 link_directories(${GLIB2_LIBRARY_DIRS})
 

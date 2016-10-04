@@ -2,6 +2,7 @@
 #include "db.h"
 
 #include <glib.h>
+
 #include <stdio.h>
 #include <sqlite3.h>
 #include <string.h>
