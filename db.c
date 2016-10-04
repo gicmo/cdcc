@@ -74,7 +74,8 @@ void db_insert(sqlite3 *db, GList *files, const gchar * const *argv) {
       f = g_file_resolve_relative_path(dir, fn);
     }
 
-    fprintf(stderr, "file: %s [%s]\n", fn, flags);
+    char *abspath = g_file_get_path(f);
+    fprintf(stderr, "file: %s [%s] -> %s\n", fn, abspath, flags);
 
     res = sqlite3_bind_text(stmt, 1, cwd, strlen(cwd), 0);
     if (res != SQLITE_OK) {
@@ -82,23 +83,26 @@ void db_insert(sqlite3 *db, GList *files, const gchar * const *argv) {
       continue;
     }
 
-    char *abspath = g_file_get_path(f);
     res = sqlite3_bind_text(stmt, 2, abspath, strlen(abspath), 0);
-    g_free(abspath);
 
     if (res != SQLITE_OK) {
       g_warning("SQL: could not bind for %s\n", fn);
+      g_free(abspath);
       continue;
     }
 
     res = sqlite3_bind_text(stmt, 3, flags, strlen(flags), 0);
     if (res != SQLITE_OK) {
       g_warning("SQL: could not bind for %s\n", fn);
+      g_free(abspath);
       continue;
     }
 
     //insert data now
     res = sqlite3_step(stmt);
+
+    g_free(abspath);
+
     if (res != SQLITE_DONE) {
       g_warning("SQL: could not insert for %s\n", fn);
       break;
