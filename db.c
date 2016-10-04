@@ -16,6 +16,12 @@ sqlite3 *db_open(const char *path)
     return NULL;
   }
 
+  res = sqlite3_busy_timeout(db, 1000);
+
+  if (res != SQLITE_OK) {
+    g_warning("SQL: Could not set busy timeout");
+  }
+
   static const char *sql =
     "CREATE TABLE IF NOT EXISTS "
     "cflags(dir TEXT, file TEXT, flags TEXT, "
@@ -29,12 +35,6 @@ sqlite3 *db_open(const char *path)
     sqlite3_free(emsg);
     sqlite3_close(db);
     return NULL;
-  }
-
-  res = sqlite3_busy_timeout(db, 1000);
-
-  if (res != SQLITE_OK) {
-    g_warning("SQL: Could not set busy timeout");
   }
 
   return db;
