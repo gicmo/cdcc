@@ -95,3 +95,50 @@ void db_insert(sqlite3 *db, GList *files, const gchar * const *argv) {
 
 }
 
+gboolean
+db_query (sqlite3 *db, const char *path, db_query_result_fn fn, gpointer user_data)
+{
+   const char *sql = "SELECT * from cflags WHERE dir GLOB ?";
+
+  sqlite3_stmt *stmt;
+
+  int res = sqlite3_prepare_v2(db, sql, strlen(sql), &stmt, NULL);
+  if (res != SQLITE_OK) {
+    g_warning("SQL: Could not prepare statement: %s", sqlite3_errmsg(db));
+    return FALSE;
+  }
+
+  res = sqlite3_bind_text(stmt, 1, path, strlen(path), 0);
+  if (res != SQLITE_OK) {
+    g_warning("SQL: could not bind for %s\n", path);
+    return FALSE;
+  }
+
+  for (gboolean keep_going; keep_going; ) {
+    res = sqlite3_step(stmt);
+
+    if (res == SQLITE_ROW) {
+      Record rec;
+      rec.dir = sqlite3_column_text(stmt, 0);
+      rec.filename = sqlite3_column_text(stmt, 1);
+      rec.args = sqlite3_column_text(stmt, 2);
+
+      if (rec.dir == NULL || rec.filename == NULL || rec.args == NULL) {
+        fprintf(stderr, "SQL: NULL values in row. skipping");
+        continue;
+      }
+
+      keep_going = (*fn)(&rec, user_data);
+
+    } else if (res == SQLITE_DONE) {
+      break;
+    } else {
+      fprintf(stderr, "SQL: Could not get data: %s\n", sqlite3_errmsg(db));
+      return FALSE;
+    }
+
+  }
+
+  sqlite3_finalize(stmt);
+  return TRUE;
+}

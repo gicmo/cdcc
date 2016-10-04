@@ -4,6 +4,12 @@
 #include <string.h>
 
 
+static gboolean export_single(const Record *data, gpointer user_data)
+{
+  printf("%s, %s, %s\n", data->dir, data->filename, data->args);
+  return TRUE;
+}
+
 static int export_data(const char *path) {
   const gchar *db_path = g_getenv("CDCC_DB");
 
@@ -19,46 +25,7 @@ static int export_data(const char *path) {
     return 1;
   }
 
-
-  const char *sql = "SELECT * from cflags WHERE dir GLOB ?";
-
-  sqlite3_stmt *stmt;
-
-  int res = sqlite3_prepare_v2(db, sql, strlen(sql), &stmt, NULL);
-  if (res != SQLITE_OK) {
-    g_warning("SQL: Could not prepare statement: %s", sqlite3_errmsg(db));
-    goto out;
-  }
-
-  res = sqlite3_bind_text(stmt, 1, path, strlen(path), 0);
-  if (res != SQLITE_OK) {
-    g_warning("SQL: could not bind for %s\n", path);
-    goto out;
-  }
-
-  for ( ; ; ) {
-    res = sqlite3_step(stmt);
-
-    if (res == SQLITE_ROW) {
-
-      const unsigned char *dir = sqlite3_column_text(stmt, 0);
-      const unsigned char *filename = sqlite3_column_text(stmt, 1);
-      const unsigned char *cflags = sqlite3_column_text(stmt, 2);
-
-      if (dir == NULL || filename == NULL || cflags == NULL) {
-        fprintf(stderr, "SQL: NULL values in row. skipping");
-        continue;
-      }
-
-      printf("path: %s, file: %s, flags: %s", dir, filename, cflags);
-    } else if (res == SQLITE_DONE) {
-      break;
-    } else {
-      fprintf(stderr, "SQL: Could not get data: %s\n", sqlite3_errmsg(db));
-      goto out;
-    }
-
-  }
+  db_query(db, path, export_single, NULL);
 
  out:
   db_close(db);
