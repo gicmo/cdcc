@@ -14,7 +14,7 @@ pkg_check_modules(SQLITE3 sqlite3)
 include_directories(${SQLITE3_INCLUDE_DIRS})
 link_directories(${SQLITE3_LIBRARY_DIRS})
 
-add_executable(cdcc-cc cc.c)
+add_executable(cdcc-cc cc.c db.c)
 target_link_libraries(cdcc-cc ${GLIB2_LIBRARIES} ${SQLITE3_LIBRARIES})
 
 install(TARGETS cdcc-cc RUNTIME DESTINATION bin)
