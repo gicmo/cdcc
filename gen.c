@@ -31,7 +31,8 @@ static int export_json(sqlite3 *db, const char *path)
   g_autoptr(JsonBuilder) jsb = json_builder_new();
 
   json_builder_begin_array(jsb);
-  db_query(db, path, export_single, jsb);
+  g_autofree char *query = g_build_filename(path, "*", NULL);
+  db_query(db, query, export_single, jsb);
   json_builder_end_array(jsb);
 
   g_autoptr(JsonNode) root = json_builder_get_root(jsb);
@@ -40,24 +41,23 @@ static int export_json(sqlite3 *db, const char *path)
   json_generator_set_pretty(gen, TRUE);
   json_generator_set_root(gen, root);
 
-  gsize len = 0;
-  g_autofree gchar *data = json_generator_to_data(gen, &len);
-  g_print("%s\n", data);
-
-  return 0;
+  g_autofree gchar *cdbpath = g_build_filename(path, "compile_commands.json", NULL);
+  gboolean res = json_generator_to_file(gen, cdbpath, NULL);
+  return res ? 0 : 1;
 }
 
 int main(int argc, char **argv)
 {
   const char *path = "*";
-  if (argc > 1) {
-    path = argv[1];
+  if (argc < 2) {
+    fprintf(stderr, "Nothing to do.\n");
+    return 0;
   }
 
   const gchar *db_path = g_getenv("CDCC_DB");
 
   if (db_path == NULL) {
-    fprintf(stderr, "CDCC_DB not specified");
+    fprintf(stderr, "CDCC_DB not specified\n");
     return 1;
   }
 
@@ -68,8 +68,17 @@ int main(int argc, char **argv)
     return 1;
   }
 
-  int res = export_json(db, path);
+  for (int i = 1; i < argc; i++) {
+    const char *path = argv[i];
+    fprintf(stderr, " %s: ", path);
+    int res = export_json(db, argv[i]);
+    if (res != 0) {
+      fprintf(stderr, "FAIL (%d)\n", res);
+    } else {
+      fprintf(stderr, "OK\n");
+    }
+  }
 
   db_close(db);
-  return res;
+  return 0;
 }
