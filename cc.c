@@ -92,7 +92,7 @@ static int call_tool(const gchar * const *args) {
   }
 
 
-  return status;
+  return WIFEXITED(status) ? WEXITSTATUS(status) : 1;
 }
 
 static int save_flags(const gchar * const *args) {
