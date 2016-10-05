@@ -2,6 +2,7 @@
 #define CDCC_DB_H
 
 #include <glib.h>
+#include <gio/gio.h>
 #include <sqlite3.h>
 
 G_BEGIN_DECLS
@@ -16,7 +17,8 @@ typedef gboolean (*db_query_result_fn) (const Record *data, gpointer user_data);
 
 sqlite3 *   db_open      (const char *path);
 void        db_close     (sqlite3 *db);
-void        db_insert    (sqlite3 *db, GList *files, const gchar * const *argv);
+void        db_insert    (sqlite3 *db, GFile *dir, GList *files,
+                          const gchar * const *argv);
 
 gboolean    db_query     (sqlite3 *db, const char *path, db_query_result_fn fn,
                           gpointer user_data);

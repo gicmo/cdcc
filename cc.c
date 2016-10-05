@@ -137,7 +137,10 @@ static int save_flags(const gchar * const *args) {
       goto compile;
     }
 
-    db_insert(db, files, args);
+    g_autofree gchar *cwd = g_get_current_dir();
+    g_autoptr (GFile) dir = g_file_new_for_path(cwd);
+
+    db_insert(db, dir, files, args);
     db_close(db);
   }
 

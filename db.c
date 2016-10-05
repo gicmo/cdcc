@@ -46,7 +46,7 @@ void db_close(sqlite3 *db) {
   }
 }
 
-void db_insert(sqlite3 *db, GList *files, const gchar * const *argv) {
+void db_insert(sqlite3 *db, GFile *dir, GList *files, const gchar * const *argv) {
   static const char *sql =
     "INSERT INTO cflags(dir, file, flags) VALUES(?, ?, ?);";
 
@@ -58,7 +58,7 @@ void db_insert(sqlite3 *db, GList *files, const gchar * const *argv) {
     return;
   }
 
-  g_autofree gchar *cwd = g_get_current_dir();
+  g_autofree gchar *cwd = g_file_get_path(dir);
   g_autofree gchar *flags = g_strjoinv(" ", (gchar **) argv);
 
   GList *iter;
