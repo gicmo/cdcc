@@ -5,6 +5,15 @@
 #include <string.h>
 #include <stdio.h>
 
+gchar *db_path(gboolean warn)
+{
+  const gchar *db_path = g_getenv("CDCC_DB");
+  if (db_path == NULL && warn) {
+    fprintf(stderr, "CDCC_DB not specified\n");
+  }
+  return g_strdup(db_path);
+}
+
 sqlite3 *db_open(const char *path)
 {
   sqlite3 *db = NULL;

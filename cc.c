@@ -97,13 +97,8 @@ static int call_tool(const gchar * const *args) {
 
 static int save_flags(const gchar * const *args) {
 
-  const gchar *db_path = g_getenv("CDCC_DB");
-  if (db_path == NULL) {
-    return 0;
-  }
-
+  g_autofree gchar *dbpath = db_path(FALSE);
   g_autoptr(GList) files = NULL;
-
   g_autofree gchar *cwd = g_get_current_dir();
   g_autoptr(GFile) dir = g_file_new_for_path(cwd);
 
@@ -139,7 +134,7 @@ static int save_flags(const gchar * const *args) {
   if (g_list_length(files) > 0) {
     sqlite3 *db;
 
-    db = db_open(db_path);
+    db = db_open(dbpath);
 
     if (db == NULL) {
       goto compile;

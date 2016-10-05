@@ -53,15 +53,14 @@ int main(int argc, char **argv)
     return 0;
   }
 
-  const gchar *db_path = g_getenv("CDCC_DB");
+  g_autofree gchar *dbpath = db_path(TRUE);
 
-  if (db_path == NULL) {
-    fprintf(stderr, "CDCC_DB not specified\n");
+  if (dbpath == NULL) {
     return 1;
   }
 
   sqlite3 *db;
-  db = db_open(db_path);
+  db = db_open(dbpath);
 
   if (db == NULL) {
     return 1;
