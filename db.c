@@ -61,38 +61,28 @@ void db_insert(sqlite3 *db, GList *files, const gchar * const *argv) {
   g_autofree gchar *cwd = g_get_current_dir();
   g_autofree gchar *flags = g_strjoinv(" ", (gchar **) argv);
 
-  g_autoptr(GFile) dir = g_file_new_for_path(cwd);
-
   GList *iter;
   for (iter = files; iter; iter = iter ->next) {
-    const char *fn = (const char *) iter->data;
-
-    g_autoptr(GFile) f = NULL;
-    if (g_path_is_absolute(fn)) {
-      f = g_file_new_for_path(fn);
-    } else {
-      f = g_file_resolve_relative_path(dir, fn);
-    }
-
+    GFile *f = (GFile *) iter->data;
     char *abspath = g_file_get_path(f);
 
     res = sqlite3_bind_text(stmt, 1, cwd, strlen(cwd), 0);
     if (res != SQLITE_OK) {
-      g_warning("SQL: could not bind for %s\n", fn);
+      g_warning("SQL: could not bind for %s\n", abspath);
       continue;
     }
 
     res = sqlite3_bind_text(stmt, 2, abspath, strlen(abspath), 0);
 
     if (res != SQLITE_OK) {
-      g_warning("SQL: could not bind for %s\n", fn);
+      g_warning("SQL: could not bind for %s\n", abspath);
       g_free(abspath);
       continue;
     }
 
     res = sqlite3_bind_text(stmt, 3, flags, strlen(flags), 0);
     if (res != SQLITE_OK) {
-      g_warning("SQL: could not bind for %s\n", fn);
+      g_warning("SQL: could not bind for %s\n", abspath);
       g_free(abspath);
       continue;
     }
@@ -103,7 +93,7 @@ void db_insert(sqlite3 *db, GList *files, const gchar * const *argv) {
     g_free(abspath);
 
     if (res != SQLITE_DONE) {
-      g_warning("SQL: could not insert for %s\n", fn);
+      g_warning("SQL: could not insert for %s\n", abspath);
       break;
     } else {
       //should not fail after a successful call to _step()

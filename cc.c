@@ -2,6 +2,7 @@
 #include "db.h"
 
 #include <glib.h>
+#include <gio/gio.h>
 
 #include <stdio.h>
 #include <sqlite3.h>
@@ -95,12 +96,25 @@ static int save_flags(const gchar * const *args) {
 
   g_autoptr(GList) files = NULL;
 
+  g_autofree gchar *cwd = g_get_current_dir();
+  g_autoptr(GFile) dir = g_file_new_for_path(cwd);
+
   const gchar * const *iter;
   for (iter = args + 1; *iter; iter++) {
     const gchar *option = *iter;
+
     if (!g_str_has_prefix(option, "-")) {
       if (is_known_type(option)) {
-        files = g_list_append(files, (gpointer) option);
+        const gchar *fn = option;
+
+        GFile *f = NULL;
+        if (g_path_is_absolute(fn)) {
+          f = g_file_new_for_path(fn);
+        } else {
+          f = g_file_resolve_relative_path(dir, fn);
+        }
+
+        files = g_list_append(files, f);
       }
 
       continue;
@@ -128,6 +142,7 @@ static int save_flags(const gchar * const *args) {
   }
 
  compile:
+  g_list_free_full(files, g_object_unref);
   return 0;
 }
 
