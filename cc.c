@@ -36,6 +36,14 @@ static gboolean is_known_type(const char *name)
   return FALSE;
 }
 
+static GFile *current_dir()
+{
+  g_autofree gchar *cwd = g_get_current_dir();
+  GFile *dir = g_file_new_for_path(cwd);
+
+  return dir;
+}
+
 static gchar *
 extract_toolname(const char *name) {
   gchar *pos = g_strstr_len(name, -1, "-");
@@ -137,8 +145,7 @@ static int save_flags(const gchar * const *args) {
       goto compile;
     }
 
-    g_autofree gchar *cwd = g_get_current_dir();
-    g_autoptr (GFile) dir = g_file_new_for_path(cwd);
+    g_autoptr (GFile) dir = current_dir();
 
     db_insert(db, dir, files, args);
     db_close(db);
