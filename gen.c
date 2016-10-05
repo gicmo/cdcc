@@ -5,9 +5,17 @@
 
 #include <json-glib/json-glib.h>
 
+typedef struct ExportData {
+  JsonBuilder *builder;
+  int rows;
+} ExportData;
+
 static gboolean export_single(const Record *data, gpointer user_data)
 {
-  JsonBuilder *jsb = (JsonBuilder *) user_data;
+  ExportData *udata = (ExportData *) user_data;
+  JsonBuilder *jsb = udata->builder;
+
+  udata->rows += 1;
   //see http://clang.llvm.org/docs/JSONCompilationDatabase.html
 
   json_builder_begin_object(jsb);
@@ -29,10 +37,11 @@ static gboolean export_single(const Record *data, gpointer user_data)
 static int export_json(sqlite3 *db, const char *path)
 {
   g_autoptr(JsonBuilder) jsb = json_builder_new();
+  ExportData udata = {.builder = jsb, .rows = 0 };
 
   json_builder_begin_array(jsb);
   g_autofree char *query = g_build_filename(path, "*", NULL);
-  db_query(db, query, export_single, jsb);
+  db_query(db, query, export_single, &udata);
   json_builder_end_array(jsb);
 
   g_autoptr(JsonNode) root = json_builder_get_root(jsb);
@@ -41,9 +50,13 @@ static int export_json(sqlite3 *db, const char *path)
   json_generator_set_pretty(gen, TRUE);
   json_generator_set_root(gen, root);
 
-  g_autofree gchar *cdbpath = g_build_filename(path, "compile_commands.json", NULL);
-  gboolean res = json_generator_to_file(gen, cdbpath, NULL);
-  return res ? 0 : 1;
+  if (udata.rows > 0) {
+    g_autofree gchar *cdbpath = g_build_filename(path, "compile_commands.json", NULL);
+    gboolean res = json_generator_to_file(gen, cdbpath, NULL);
+    return res ? udata.rows : -1;
+  }
+
+  return 0;
 }
 
 int main(int argc, char **argv)
@@ -67,13 +80,24 @@ int main(int argc, char **argv)
   }
 
   for (int i = 1; i < argc; i++) {
-    const char *path = argv[i];
+    g_autoptr(GFile) f = g_file_new_for_commandline_arg(argv[i]);
+    GFileType ft = g_file_query_file_type(f, G_FILE_QUERY_INFO_NONE, NULL);
+
+    g_autofree char *path = g_file_get_path(f);
     fprintf(stderr, " %s: ", path);
-    int res = export_json(db, argv[i]);
-    if (res != 0) {
-      fprintf(stderr, "FAIL (%d)\n", res);
+
+    if (ft != G_FILE_TYPE_DIRECTORY) {
+      fprintf(stderr, "Skipped\n");
+      continue;
+    }
+
+    int res = export_json(db, path);
+    if (res < 0) {
+      fprintf(stderr, "FAIL\n");
+    } else if (res == 0) {
+      fprintf(stderr, "No data\n");
     } else {
-      fprintf(stderr, "OK\n");
+      fprintf(stderr, "OK [%d]\n", res);
     }
   }
 
