@@ -1,6 +1,10 @@
 cmake_minimum_required (VERSION 3.0)
 project (cdcc C)
 
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wunreachable-code")
+set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS} -O0 -ggdb3")
+set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS} -O2")
+
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_INSTALL_PREFIX $ENV{HOME}/.local)
 
