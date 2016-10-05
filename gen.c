@@ -48,7 +48,6 @@ static int export_json(sqlite3 *db, const char *path)
 
 int main(int argc, char **argv)
 {
-  const char *path = "*";
   if (argc < 2) {
     fprintf(stderr, "Nothing to do.\n");
     return 0;
