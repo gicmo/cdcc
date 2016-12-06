@@ -8,10 +8,12 @@
 gchar *db_path(gboolean warn)
 {
   const gchar *db_path = g_getenv("CDCC_DB");
-  if (db_path == NULL && warn) {
-    fprintf(stderr, "CDCC_DB not specified\n");
+  if (db_path != NULL) {
+    return g_strdup(db_path);
   }
-  return g_strdup(db_path);
+
+  const gchar *user_cache = g_get_user_cache_dir();
+  return g_build_filename(user_cache, "cdcc.db", NULL);
 }
 
 sqlite3 *db_open(const char *path)
