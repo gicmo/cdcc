@@ -15,7 +15,7 @@ typedef struct Record {
 
 typedef gboolean (*db_query_result_fn) (const Record *data, gpointer user_data);
 
-gchar *     db_path      (gboolean warn);
+gchar *     db_path      ();
 sqlite3 *   db_open      (const char *path);
 void        db_close     (sqlite3 *db);
 void        db_insert    (sqlite3 *db, GFile *dir, GList *files,

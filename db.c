@@ -5,7 +5,7 @@
 #include <string.h>
 #include <stdio.h>
 
-gchar *db_path(gboolean warn)
+gchar *db_path()
 {
   const gchar *db_path = g_getenv("CDCC_DB");
   if (db_path != NULL) {

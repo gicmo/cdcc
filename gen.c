@@ -66,7 +66,7 @@ int main(int argc, char **argv)
     return 0;
   }
 
-  g_autofree gchar *dbpath = db_path(TRUE);
+  g_autofree gchar *dbpath = db_path();
 
   if (dbpath == NULL) {
     return 1;

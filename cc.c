@@ -97,7 +97,7 @@ static int call_tool(const gchar * const *args) {
 
 static int save_flags(const gchar * const *args) {
 
-  g_autofree gchar *dbpath = db_path(FALSE);
+  g_autofree gchar *dbpath = db_path();
   g_autoptr(GList) files = NULL;
   g_autofree gchar *cwd = g_get_current_dir();
   g_autoptr(GFile) dir = g_file_new_for_path(cwd);
