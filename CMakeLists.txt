@@ -31,8 +31,16 @@ target_link_libraries(cdcc-gen
   ${SQLITE3_LIBRARIES}
   ${GJSON_LIBRARIES})
 
+add_executable(cdcc-query query.c db.c)
+target_link_libraries(cdcc-query
+  ${GLIB2_LIBRARIES}
+  ${SQLITE3_LIBRARIES}
+  ${GJSON_LIBRARIES})
+
+
 install(TARGETS cdcc-cc    RUNTIME DESTINATION bin)
 install(TARGETS cdcc-gen   RUNTIME DESTINATION bin)
+install(TARGETS cdcc-query RUNTIME DESTINATION bin)
 
 set(TOOLS gcc g++ clang clang++)
 foreach(tool IN LISTS TOOLS)
