@@ -84,20 +84,20 @@ int main(int argc, char **argv)
     GFileType ft = g_file_query_file_type(f, G_FILE_QUERY_INFO_NONE, NULL);
 
     g_autofree char *path = g_file_get_path(f);
-    fprintf(stderr, " %s: ", path);
+    fprintf(stderr, " %s:", path);
 
     if (ft != G_FILE_TYPE_DIRECTORY) {
-      fprintf(stderr, "Skipped\n");
+      fprintf(stderr, " Skipped\n");
       continue;
     }
 
     int res = export_json(db, path);
     if (res < 0) {
-      fprintf(stderr, "FAIL\n");
+      fprintf(stderr, "\033[1;31m FAIL\033[0m\n");
     } else if (res == 0) {
-      fprintf(stderr, "No data\n");
+      fprintf(stderr, "\033[1;33m No data\033[0m\n");
     } else {
-      fprintf(stderr, "OK [%d]\n", res);
+      fprintf(stderr, "\033[1;32m OK\033[0m [%d]\n", res);
     }
   }
 
