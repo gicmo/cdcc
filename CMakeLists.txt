@@ -11,7 +11,12 @@ set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS} -O0 -ggdb3")
 set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS} -O2")
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-set(CMAKE_INSTALL_PREFIX $ENV{HOME}/.local)
+
+option(GLOBAL_INSTALL "install globally, not in $HOME/.local/bin" [OFF])
+
+if(NOT GLOBAL_INSTALL)
+  set(CMAKE_INSTALL_PREFIX $ENV{HOME}/.local)
+endif()
 
 find_package(PkgConfig REQUIRED)
 
