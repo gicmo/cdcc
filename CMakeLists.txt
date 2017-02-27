@@ -62,3 +62,16 @@ foreach(tool IN LISTS TOOLS)
   install(FILES ${CMAKE_BINARY_DIR}/cdcc-${tool}  DESTINATION bin)
 endforeach()
 
+# tarballs
+set(CPACK_GENERATOR TGZ)
+set(CPACK_SOURCE_PACKAGE_FILE_NAME "cdcc-${CDCC_VERSION}"
+    CACHE INTERNAL "tarball basename")
+set(CPACK_SOURCE_GENERATOR TGZ)
+
+set(CPACK_SOURCE_IGNORE_FILES
+    "~$"
+    "\\\\.gitignore$"
+    "^${PROJECT_SOURCE_DIR}/.git/"
+    "^${PROJECT_SOURCE_DIR}/build/")
+
+include(CPack)
