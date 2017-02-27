@@ -75,3 +75,7 @@ set(CPACK_SOURCE_IGNORE_FILES
     "^${PROJECT_SOURCE_DIR}/build/")
 
 include(CPack)
+
+message("=========================================")
+message("Version:      ... ${CDCC_VERSION}")
+message("Install path: ... ${CMAKE_INSTALL_PREFIX}")
