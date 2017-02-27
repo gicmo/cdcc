@@ -1,6 +1,11 @@
 cmake_minimum_required (VERSION 3.0)
 project (cdcc C)
 
+set(VERSION_MAJOR 0)
+set(VERSION_MINOR 1)
+
+set(CDCC_VERSION "${VERSION_MAJOR}.${VERSION_MINOR}")
+
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wunreachable-code")
 set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS} -O0 -ggdb3")
 set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS} -O2")
