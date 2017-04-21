@@ -59,14 +59,46 @@ static int export_json(sqlite3 *db, const char *path)
   return 0;
 }
 
+static void rc_load_commands(GFile *path)
+{
+  gboolean ok;
+  g_autoptr(GError) error = NULL;
+  g_autofree char *arg_path = g_file_get_path(path);
+  gint exit_status;
+  char *argv[] = {"rc", "-J", arg_path, NULL};
+
+  ok = g_spawn_sync(NULL,
+                    argv,
+                    NULL,
+                    G_SPAWN_SEARCH_PATH |
+                    G_SPAWN_STDOUT_TO_DEV_NULL |
+                    G_SPAWN_STDERR_TO_DEV_NULL,
+                    NULL,
+                    NULL,
+                    NULL,
+                    NULL,
+                    &exit_status,
+                    &error);
+  if (!ok) {
+    fprintf(stderr, " [\033[1;31mFAIL: calling rc: %s\033[0m]", error->message);
+  } else if (!g_spawn_check_exit_status(exit_status, &error)) {
+    fprintf(stderr, " [rc \033[1;31mFAIL\033[0m: %s]", error->message);
+  } else {
+    fprintf(stderr, " [rc: \033[1;32m OK\033[0m]");
+  }
+}
+
 int main(int argc, char **argv)
 {
   g_autoptr(GOptionContext) context = NULL;
   g_auto(GStrv) paths = NULL;
   g_autoptr(GError) error = NULL;
 
+  gboolean load_commands = FALSE;
+
   const GOptionEntry entries[] = {
     { G_OPTION_REMAINING, '\0', 0, G_OPTION_ARG_FILENAME_ARRAY, &paths, "Source module path", "PATH..." },
+    { "load-commands", 'J', 0, G_OPTION_ARG_NONE, &load_commands, "Load generated commads via rc -J" },
     { NULL }
   };
 
@@ -114,7 +146,11 @@ int main(int argc, char **argv)
     } else if (res == 0) {
       fprintf(stderr, "\033[1;33m No data\033[0m\n");
     } else {
-      fprintf(stderr, "\033[1;32m OK\033[0m [%d]\n", res);
+      fprintf(stderr, "\033[1;32m OK\033[0m [%d]", res);
+      if (load_commands) {
+        rc_load_commands(f);
+      }
+      fprintf(stderr, "\n");
     }
   }
 
