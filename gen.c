@@ -61,7 +61,24 @@ static int export_json(sqlite3 *db, const char *path)
 
 int main(int argc, char **argv)
 {
-  if (argc < 2) {
+  g_autoptr(GOptionContext) context = NULL;
+  g_auto(GStrv) paths = NULL;
+  g_autoptr(GError) error = NULL;
+
+  const GOptionEntry entries[] = {
+    { G_OPTION_REMAINING, '\0', 0, G_OPTION_ARG_FILENAME_ARRAY, &paths, "Source module path", "PATH..." },
+    { NULL }
+  };
+
+  context = g_option_context_new("- Generate compile commands file");
+  g_option_context_add_main_entries(context, entries, NULL);
+
+  if (!g_option_context_parse(context, &argc, &argv, &error)) {
+    fprintf(stderr, "option parsing failed: %s", error->message);
+    return -1;
+  }
+
+  if (paths == NULL) {
     fprintf(stderr, "Nothing to do.\n");
     return 0;
   }
@@ -79,8 +96,8 @@ int main(int argc, char **argv)
     return 1;
   }
 
-  for (int i = 1; i < argc; i++) {
-    g_autoptr(GFile) f = g_file_new_for_commandline_arg(argv[i]);
+  for (GStrv path = paths; *path != NULL; path++) {
+    g_autoptr(GFile) f = g_file_new_for_commandline_arg(*path);
     GFileType ft = g_file_query_file_type(f, G_FILE_QUERY_INFO_NONE, NULL);
 
     g_autofree char *path = g_file_get_path(f);
