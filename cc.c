@@ -9,7 +9,11 @@
 #include <string.h>
 
 #include <sys/types.h>
+#ifdef _WIN32
+#include <windows.h>
+#else
 #include <sys/wait.h>
+#endif
 
 #include <errno.h>
 
@@ -78,6 +82,18 @@ static int call_tool(const gchar * const *args) {
 
 
   int res, status;
+#ifdef _WIN32
+  res = WaitForSingleObject(pid, INFINITE);
+  if (res != WAIT_OBJECT_0)
+  {
+    int err = GetLastError();
+    g_warning("WaitForSingleObject error %d", err);
+    g_spawn_close_pid(pid);
+    return 1;
+  }
+  GetExitCodeProcess(pid, (LPDWORD)&status);
+  g_spawn_close_pid(pid);
+#else
  again:
   res = waitpid(pid, &status, 0);
 
@@ -91,8 +107,10 @@ static int call_tool(const gchar * const *args) {
     return 1;
   }
 
+  status = WIFEXITED(status) ? WEXITSTATUS(status) : 1;
+#endif
 
-  return WIFEXITED(status) ? WEXITSTATUS(status) : 1;
+  return status;
 }
 
 static int save_flags(const gchar * const *args) {
