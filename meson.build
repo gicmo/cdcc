@@ -16,19 +16,22 @@ executable('cdcc-cc',
 	   sources: [ 'cc.c', 'db.c' ],
 	   cpp_args: c_flags,
 	   link_args: ld_flags,
-	   dependencies: [glib, gio, sqlite])
+	   dependencies: [glib, gio, sqlite],
+	   install: true)
 
 
 executable('cdcc-gen',
-	   sources: [ 'cc.c', 'db.c' ],
+	   sources: [ 'gen.c', 'db.c' ],
 	   cpp_args: c_flags,
 	   link_args: ld_flags,
-	   dependencies: alldep)
+	   dependencies: alldep,
+	   install: true)
 
 
 executable('cdcc-query',
 	   sources: [ 'query.c', 'db.c' ],
 	   cpp_args: c_flags,
 	   link_args: ld_flags,
-	   dependencies: alldep)
+	   dependencies: alldep,
+	   install: true)
 
