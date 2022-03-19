@@ -50,7 +50,8 @@ static GFile *current_dir()
 
 static gchar *
 extract_toolname(const char *name) {
-  gchar *pos = g_strstr_len(name, -1, "-");
+  gchar *pos = strrchr(name, '/');
+  pos = strchr(pos, '-');
 
   if (pos == NULL || *++pos == '\0') {
     return NULL;
